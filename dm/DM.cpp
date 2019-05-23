@@ -816,6 +816,9 @@ template <typename T>
 void gather_file_srcs(const CommandLineFlags::StringArray& flags,
                       const char*                          ext,
                       const char*                          src_name = nullptr) {
+
+    fprintf(stdout, "running file srcs gather for %s \n", ext);
+
     if (!src_name) {
         // With the exception of Lottie files, the source name is the extension.
         src_name = ext;

@@ -118,7 +118,7 @@ static DEFINE_string2(match, m, nullptr,
     static DEFINE_string(lotties, "lotties", "Directory to read (Bodymovin) jsons from.");
 #endif
 
-static DEFINE_string(svgs, "", "Directory to read SVGs from, or a single SVG file.");
+static DEFINE_string(svgs, "svgs", "Directory to read SVGs from, or a single SVG file.");
 
 static DEFINE_int_2(threads, j, -1,
                "Run threadsafe tests on a threadpool with this many extra threads, "
@@ -601,7 +601,7 @@ void Viewer::initSlides() {
         },
 #endif
 #if defined(SK_XML)
-        { ".svg", "svg-dir", FLAGS_svgs,
+        { ".svg", "svg", FLAGS_svgs,
             [](const SkString& name, const SkString& path) -> sk_sp<Slide> {
                 return sk_make_sp<SvgSlide>(name, path);}
         },
@@ -622,73 +622,75 @@ void Viewer::initSlides() {
                 }
             };
 
-    if (!FLAGS_file.isEmpty()) {
-        // single file mode
-        const SkString file(FLAGS_file[0]);
+//    if (!FLAGS_file.isEmpty()) {
+//        // single file mode
+//        const SkString file(FLAGS_file[0]);
+//
+//        if (sk_exists(file.c_str(), kRead_SkFILE_Flag)) {
+//            for (const auto& sinfo : gExternalSlidesInfo) {
+//                if (file.endsWith(sinfo.fExtension)) {
+//                    addSlide(SkOSPath::Basename(file.c_str()), file, sinfo.fFactory);
+//                    return;
+//                }
+//            }
+//
+//            fprintf(stderr, "Unsupported file type \"%s\"\n", file.c_str());
+//        } else {
+//            fprintf(stderr, "Cannot read \"%s\"\n", file.c_str());
+//        }
+//
+//        return;
+//    }
+//
+//    // Bisect slide.
+//    if (!FLAGS_bisect.isEmpty()) {
+//        sk_sp<BisectSlide> bisect = BisectSlide::Create(FLAGS_bisect[0]);
+//        if (bisect && !CommandLineFlags::ShouldSkip(FLAGS_match, bisect->getName().c_str())) {
+//            if (FLAGS_bisect.count() >= 2) {
+//                for (const char* ch = FLAGS_bisect[1]; *ch; ++ch) {
+//                    bisect->onChar(*ch);
+//                }
+//            }
+//            fSlides.push_back(std::move(bisect));
+//        }
+//    }
+//
+//    // GMs
+//    int firstGM = fSlides.count();
+//    for (skiagm::GMFactory gmFactory : skiagm::GMRegistry::Range()) {
+//        std::unique_ptr<skiagm::GM> gm(gmFactory(nullptr));
+//        if (!CommandLineFlags::ShouldSkip(FLAGS_match, gm->getName())) {
+//            sk_sp<Slide> slide(new GMSlide(gm.release()));
+//            fSlides.push_back(std::move(slide));
+//        }
+//    }
+//    // reverse gms
+//    int numGMs = fSlides.count() - firstGM;
+//    for (int i = 0; i < numGMs/2; ++i) {
+//        std::swap(fSlides[firstGM + i], fSlides[fSlides.count() - i - 1]);
+//    }
 
-        if (sk_exists(file.c_str(), kRead_SkFILE_Flag)) {
-            for (const auto& sinfo : gExternalSlidesInfo) {
-                if (file.endsWith(sinfo.fExtension)) {
-                    addSlide(SkOSPath::Basename(file.c_str()), file, sinfo.fFactory);
-                    return;
-                }
-            }
+//    // samples
+//    for (const SampleFactory factory : SampleRegistry::Range()) {
+//        sk_sp<Slide> slide(new SampleSlide(factory));
+//        if (!CommandLineFlags::ShouldSkip(FLAGS_match, slide->getName().c_str())) {
+//            fSlides.push_back(slide);
+//        }
+//    }
 
-            fprintf(stderr, "Unsupported file type \"%s\"\n", file.c_str());
-        } else {
-            fprintf(stderr, "Cannot read \"%s\"\n", file.c_str());
-        }
-
-        return;
-    }
-
-    // Bisect slide.
-    if (!FLAGS_bisect.isEmpty()) {
-        sk_sp<BisectSlide> bisect = BisectSlide::Create(FLAGS_bisect[0]);
-        if (bisect && !CommandLineFlags::ShouldSkip(FLAGS_match, bisect->getName().c_str())) {
-            if (FLAGS_bisect.count() >= 2) {
-                for (const char* ch = FLAGS_bisect[1]; *ch; ++ch) {
-                    bisect->onChar(*ch);
-                }
-            }
-            fSlides.push_back(std::move(bisect));
-        }
-    }
-
-    // GMs
-    int firstGM = fSlides.count();
-    for (skiagm::GMFactory gmFactory : skiagm::GMRegistry::Range()) {
-        std::unique_ptr<skiagm::GM> gm(gmFactory(nullptr));
-        if (!CommandLineFlags::ShouldSkip(FLAGS_match, gm->getName())) {
-            sk_sp<Slide> slide(new GMSlide(gm.release()));
-            fSlides.push_back(std::move(slide));
-        }
-    }
-    // reverse gms
-    int numGMs = fSlides.count() - firstGM;
-    for (int i = 0; i < numGMs/2; ++i) {
-        std::swap(fSlides[firstGM + i], fSlides[fSlides.count() - i - 1]);
-    }
-
-    // samples
-    for (const SampleFactory factory : SampleRegistry::Range()) {
-        sk_sp<Slide> slide(new SampleSlide(factory));
-        if (!CommandLineFlags::ShouldSkip(FLAGS_match, slide->getName().c_str())) {
-            fSlides.push_back(slide);
-        }
-    }
-
-    // Particle demo
-    {
-        // TODO: Convert this to a sample
-        sk_sp<Slide> slide(new ParticlesSlide());
-        if (!CommandLineFlags::ShouldSkip(FLAGS_match, slide->getName().c_str())) {
-            fSlides.push_back(std::move(slide));
-        }
-    }
+//    // Particle demo
+//    {
+//        // TODO: Convert this to a sample
+//        sk_sp<Slide> slide(new ParticlesSlide());
+//        if (!CommandLineFlags::ShouldSkip(FLAGS_match, slide->getName().c_str())) {
+//            fSlides.push_back(std::move(slide));
+//        }
+//    }
 
     for (const auto& info : gExternalSlidesInfo) {
+        fprintf(stdout, "outside for loop for %s \n", info.fExtension);
         for (const auto& flag : info.fFlags) {
+            fprintf(stdout, "inside for loop, flag = %s \n", flag.c_str());
             if (SkStrEndsWith(flag.c_str(), info.fExtension)) {
                 // single file
                 addSlide(SkOSPath::Basename(flag.c_str()), flag, info.fFactory);

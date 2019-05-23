@@ -2359,6 +2359,23 @@ if (skia_enable_tools) {
     }
   }
 
+  if (!skia_use_angle && (is_linux || is_win || is_mac)) {
+      test_app("HelloWorldAnurag") {
+        sources = [
+          "example/HelloWorldAnurag.cpp",
+        ]
+        libs = []
+
+        deps = [
+          ":flags",
+          ":gpu_tool_utils",
+          ":sk_app",
+          ":skia",
+          ":tool_utils",
+        ]
+      }
+    }
+
   if (is_linux || is_mac || is_ios) {
     test_app("SkiaSDLExample") {
       sources = [
